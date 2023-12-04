@@ -43,5 +43,5 @@ export async function GET(request: NextRequest) {
     }
 
    
-    return Response.json(response, {status: 201});
+    return NextResponse.json(response, {status: 201});
   }
