@@ -23,6 +23,7 @@ import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {VerticalDotsIcon} from "./icons";
+import CustomModal from "./custom-modal";
 
 const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
@@ -78,11 +79,61 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
     setIsLoading(false);
 
-    notifyTodoAddedEvent("할일이 성공적으로 추가되었습니다!");
+    notifySuccessEvent("할일이 성공적으로 추가되었습니다!");
 
     console.log(`할일 추가완료: ${newTodoInput}`)
 
 
+  };
+
+  const editAtodoHandler = async (
+    id: string, 
+    editedTitle: string, 
+    editdIsDone: boolean) => {
+
+    setIsLoading(true);
+
+    // setTimeout(() => {
+    //   console.log("첫 번째 메시지")
+    // }, 5000);
+
+    await new Promise(f => setTimeout(f, 600));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`, {
+      method: 'post',
+      body: JSON.stringify({
+        title: editedTitle,
+        is_done: editdIsDone
+      }),
+      cache: 'no-store'
+    });
+
+    router.refresh();
+
+    setIsLoading(false);
+
+    notifySuccessEvent("할일 수정 완료!");
+  };
+
+  const deleteAtodoHandler = async (
+    id: string) => {
+
+    setIsLoading(true);
+
+    // setTimeout(() => {
+    //   console.log("첫 번째 메시지")
+    // }, 5000);
+
+    await new Promise(f => setTimeout(f, 600));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`, {
+      method: 'delete',
+      cache: 'no-store'
+    });
+
+    router.refresh();
+
+    setIsLoading(false);
+
+    notifySuccessEvent("할일 삭제 완료!");
   };
 
 
@@ -109,7 +160,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
                 onOpen();
               }}>
                 <DropdownItem key="detail">상세보기</DropdownItem>
-                <DropdownItem key="update">수정</DropdownItem>
+                <DropdownItem key="edit">수정</DropdownItem>
                 <DropdownItem key="delete">삭제</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -137,31 +188,29 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
-  const notifyTodoAddedEvent = (msg: string) => toast.success(msg);
+  const notifySuccessEvent = (msg: string) => toast.success(msg);
 
   const ModealComponent = () => {
     return <div>
-      <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">{currentModalData.modalType}</ModalHeader>
-              <ModalBody>
-                <p> 
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Action
-                </Button>
-              </ModalFooter>
-            </>
+            (currentModalData.focusedTodo && <CustomModal 
+              focusedTodo={currentModalData.focusedTodo}
+              modalType={currentModalData.modalType}
+              onClose={onClose}
+              onEdit={ async (id, title, isDone) => {
+
+                await editAtodoHandler(id, title, isDone);
+                onClose();
+              }}
+              onDelete={ async (id) =>{
+
+                await deleteAtodoHandler(id);
+                onClose();
+              }}
+              />)
+            
           )}
         </ModalContent>
       </Modal>
