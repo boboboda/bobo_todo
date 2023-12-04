@@ -137,14 +137,18 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
   };
 
 
+  const applycIsDoneUI = (isDone: boolean) => 
+  (isDone ? "line-through text-gray-900/50 dark:text-white/40" : "")
+
+
 
 
   const TodoRow = (aTodo: Todo) => {
     return <TableRow key={aTodo.id}>
-      <TableCell>{aTodo.id.slice(0, 4)}</TableCell>
-      <TableCell>{aTodo.title}</TableCell>
+      <TableCell className={applycIsDoneUI(aTodo.is_done)}>{aTodo.id.slice(0, 4)}</TableCell>
+      <TableCell className={applycIsDoneUI(aTodo.is_done)}>{aTodo.title}</TableCell>
       <TableCell>{aTodo.is_done ? "✅" : "⬜"}</TableCell>
-      <TableCell>{`${aTodo.created_at}`}</TableCell>
+      <TableCell className={applycIsDoneUI(aTodo.is_done)}>{`${aTodo.created_at}`}</TableCell>
       <TableCell>
         <div className="relative flex justify-end items-center gap-2">
             <Dropdown>
